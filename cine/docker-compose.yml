@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cine-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cine_user
+      POSTGRES_PASSWORD: cine_pass
+      POSTGRES_DB: cine_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - cine_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cine_user -d cine_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  cine_postgres_data:

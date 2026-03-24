@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  EMPLOYEE
+  ADMIN
+}
+
+enum MovieStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ScreeningStatus {
+  SCHEDULED
+  SOLD_OUT
+  CANCELLED
+}
+
+enum TicketStatus {
+  ACTIVE
+  USED
+}
+
+model User {
+  id               String   @id @default(cuid())
+  name             String
+  email            String   @unique
+  role             UserRole @default(CUSTOMER)
+  tickets          Ticket[] @relation("PurchasedTickets")
+  validatedTickets Ticket[] @relation("ValidatedTickets")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Movie {
+  id              Int           @id @default(autoincrement())
+  title           String
+  genre           String
+  durationMinutes Int
+  classification  String
+  imageUrl        String
+  heroImageUrl    String?
+  synopsis        String?
+  status          MovieStatus   @default(DRAFT)
+  isFeatured      Boolean       @default(false)
+  screenings      Screening[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([genre, status])
+  @@index([isFeatured, status])
+}
+
+model Room {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  description String?
+  rowsCount   Int
+  columnsCount Int
+  capacity    Int
+  isActive    Boolean     @default(true)
+  seats       Seat[]
+  screenings  Screening[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([isActive])
+}
+
+model Screening {
+  id          Int             @id @default(autoincrement())
+  movieId     Int
+  roomId      Int
+  showDate    DateTime
+  showTime    String
+  startsAt    DateTime
+  price       Decimal         @db.Decimal(10, 2)
+  capacity    Int             @default(150)
+  status      ScreeningStatus @default(SCHEDULED)
+  movie       Movie           @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  room        Room            @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  tickets     Ticket[]
+  ticketSeats TicketSeat[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@unique([roomId, startsAt])
+  @@index([movieId, showDate, startsAt])
+  @@index([roomId, showDate, startsAt])
+  @@index([status, showDate])
+}
+
+model Seat {
+  id           Int          @id @default(autoincrement())
+  roomId       Int
+  rowLabel     String
+  columnNumber Int
+  label        String
+  isActive     Boolean      @default(true)
+  room         Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  ticketSeats  TicketSeat[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@unique([roomId, label])
+  @@unique([roomId, rowLabel, columnNumber])
+  @@index([roomId, rowLabel])
+}
+
+model Ticket {
+  id            String       @id @default(cuid())
+  code          String       @unique
+  userId        String
+  screeningId   Int
+  status        TicketStatus @default(ACTIVE)
+  totalAmount   Decimal      @db.Decimal(10, 2)
+  seatsCount    Int
+  purchasedAt   DateTime     @default(now())
+  validatedAt   DateTime?
+  validatedById String?
+  user          User         @relation("PurchasedTickets", fields: [userId], references: [id], onDelete: Restrict)
+  screening     Screening    @relation(fields: [screeningId], references: [id], onDelete: Restrict)
+  validatedBy   User?        @relation("ValidatedTickets", fields: [validatedById], references: [id], onDelete: SetNull)
+  details       TicketSeat[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([screeningId, status])
+  @@index([userId, purchasedAt])
+  @@unique([id, screeningId])
+}
+
+model TicketSeat {
+  id          String    @id @default(cuid())
+  ticketId    String
+  screeningId Int
+  seatId      Int
+  ticket      Ticket    @relation(fields: [ticketId, screeningId], references: [id, screeningId], onDelete: Cascade)
+  screening   Screening @relation(fields: [screeningId], references: [id], onDelete: Cascade)
+  seat        Seat      @relation(fields: [seatId], references: [id], onDelete: Restrict)
+  createdAt   DateTime  @default(now())
+
+  @@unique([screeningId, seatId])
+  @@unique([ticketId, seatId])
+  @@index([ticketId])
+  @@index([screeningId])
+}

@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #141414;
+  --foreground: #ffffff;
+  --accent: #e50914;
+  --surface: #2f2f2f;
+  --surface-soft: #1a1a1a;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(229, 9, 20, 0.18), transparent 24%),
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.06), transparent 18%),
+    linear-gradient(180deg, #101010 0%, #141414 22%, #111111 100%);
+  color: var(--foreground);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Bebas Neue", "Arial Narrow", sans-serif;
+  letter-spacing: 0.02em;
+}
+
+* {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+::selection {
+  background: rgba(229, 9, 20, 0.4);
+  color: #ffffff;
+}
+
+.poster-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.poster-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.08), transparent 80%);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.poster-sheen:hover::after {
+  opacity: 1;
+}
