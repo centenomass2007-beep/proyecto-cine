@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { formatDateTime } from "@/lib/formatters";
 import { getPublicHomepageData } from "@/server/services/catalog.service";
 
+export const dynamic = "force-dynamic";
+
 function posterBackground(imageUrl: string | null | undefined) {
   if (!imageUrl) {
     return "linear-gradient(145deg, rgba(122, 9, 20, 0.92), rgba(22, 22, 22, 0.95))";

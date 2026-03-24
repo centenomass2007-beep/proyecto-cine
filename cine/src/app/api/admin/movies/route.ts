@@ -1,4 +1,5 @@
 import { MovieStatus } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
@@ -21,6 +22,11 @@ export async function POST(request: Request) {
         : MovieStatus.DRAFT,
       isFeatured: Boolean(body?.isFeatured),
     });
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+    revalidatePath("/admin/peliculas");
+    revalidatePath(`/peliculas/${movie.id}`);
 
     return NextResponse.json(movie, { status: 201 });
   } catch (error) {

@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
@@ -14,6 +15,11 @@ export async function POST(request: Request) {
       showTime: String(body?.showTime ?? ""),
       price: Number(body?.price),
     });
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+    revalidatePath("/admin/funciones");
+    revalidatePath(`/peliculas/${screening.movieId}`);
 
     return NextResponse.json(screening, { status: 201 });
   } catch (error) {
