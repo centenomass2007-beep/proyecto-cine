@@ -2,10 +2,20 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { getCurrentAdminSession } from "@/server/auth/admin-session";
 import { createScreening } from "@/server/services/admin.service";
 
 export async function POST(request: Request) {
   try {
+    const session = await getCurrentAdminSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { message: "Debes iniciar sesión como administrador para continuar." },
+        { status: 401 },
+      );
+    }
+
     const body = await request.json();
 
     const screening = await createScreening(db, {

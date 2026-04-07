@@ -1,8 +1,31 @@
 import { PrismaClient, UserRole } from "@prisma/client";
 
+import { hashPassword } from "../src/server/auth/password";
+
 const prisma = new PrismaClient();
 
 async function main() {
+  const adminEmail = process.env.ADMIN_DEFAULT_EMAIL?.trim().toLowerCase() || "admin@cine.local";
+  const adminName = process.env.ADMIN_DEFAULT_NAME?.trim() || "Administrador General";
+  const adminPassword = process.env.ADMIN_DEFAULT_PASSWORD?.trim() || "Admin12345!";
+
+  await prisma.user.upsert({
+    where: { id: "admin_demo_cine" },
+    update: {
+      name: adminName,
+      email: adminEmail,
+      role: UserRole.ADMIN,
+      passwordHash: hashPassword(adminPassword),
+    },
+    create: {
+      id: "admin_demo_cine",
+      name: adminName,
+      email: adminEmail,
+      role: UserRole.ADMIN,
+      passwordHash: hashPassword(adminPassword),
+    },
+  });
+
   await prisma.user.upsert({
     where: { id: "emp_demo_cine" },
     update: {

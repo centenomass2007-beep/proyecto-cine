@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { getCurrentAdminSession } from "@/server/auth/admin-session";
 import { updateMovie } from "@/server/services/admin.service";
 
 type RouteContext = {
@@ -13,6 +14,15 @@ type RouteContext = {
 
 export async function PATCH(request: Request, context: RouteContext) {
   try {
+    const session = await getCurrentAdminSession();
+
+    if (!session) {
+      return NextResponse.json(
+        { message: "Debes iniciar sesión como administrador para continuar." },
+        { status: 401 },
+      );
+    }
+
     const { movieId } = await context.params;
     const body = await request.json();
 

@@ -1,14 +1,23 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { AdminNav } from "@/components/admin/admin-nav";
+import { AdminLogoutButton } from "@/components/admin/admin-logout-button";
+import { getCurrentAdminSession } from "@/server/auth/admin-session";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getCurrentAdminSession();
+
+  if (!session) {
+    redirect("/login/admin");
+  }
+
   return (
     <main className="mx-auto min-h-screen max-w-7xl px-6 py-10 lg:px-8">
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -21,12 +30,18 @@ export default function AdminLayout({
           </p>
         </div>
 
-        <Link
-          href="/"
-          className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10"
-        >
-          Volver a la landing
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/75">
+            Sesión activa: <span className="font-semibold text-white">{session.name}</span>
+          </div>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+          >
+            Volver a la landing
+          </Link>
+          <AdminLogoutButton />
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
