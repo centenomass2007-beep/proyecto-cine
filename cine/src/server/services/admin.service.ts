@@ -5,6 +5,8 @@ import {
   ScreeningStatus,
 } from "@prisma/client";
 
+import { parseCinemaDateTime, parseCinemaDay } from "@/lib/cinema-datetime";
+
 const ROOM_ROW_LABELS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 export type CreateMovieInput = {
@@ -59,13 +61,8 @@ function buildRoomSeats(roomId: number, rowsCount: number, columnsCount: number)
 }
 
 function buildScreeningDates(showDate: string, showTime: string) {
-  const normalizedTime = `${showTime}:00`;
-  const startsAt = new Date(`${showDate}T${normalizedTime}`);
-  const dayStartsAt = new Date(`${showDate}T00:00:00`);
-
-  if (Number.isNaN(startsAt.getTime()) || Number.isNaN(dayStartsAt.getTime())) {
-    throw new Error("La fecha u hora de la función no es válida.");
-  }
+  const startsAt = parseCinemaDateTime(showDate, showTime);
+  const dayStartsAt = parseCinemaDay(showDate);
 
   return {
     startsAt,
@@ -221,6 +218,10 @@ export async function createScreening(prisma: PrismaClient, input: CreateScreeni
   }
 
   const { startsAt, dayStartsAt } = buildScreeningDates(input.showDate, input.showTime);
+
+  if (startsAt.getTime() <= Date.now()) {
+    throw new Error("Debes programar la función en una fecha y hora futuras.");
+  }
 
   try {
     return await prisma.$transaction(

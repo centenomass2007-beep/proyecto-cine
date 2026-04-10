@@ -1,3 +1,5 @@
+import { CINEMA_TIME_ZONE } from "@/lib/cinema-datetime";
+
 export function formatCurrency(value: number | string | { toString(): string } | null | undefined) {
   const amount = Number(value ?? 0);
 
@@ -12,12 +14,14 @@ export function formatDateTime(value: Date | string) {
   return new Intl.DateTimeFormat("es-CO", {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone: CINEMA_TIME_ZONE,
   }).format(new Date(value));
 }
 
 export function formatDateOnly(value: Date | string) {
   return new Intl.DateTimeFormat("es-CO", {
     dateStyle: "medium",
+    timeZone: CINEMA_TIME_ZONE,
   }).format(new Date(value));
 }
 

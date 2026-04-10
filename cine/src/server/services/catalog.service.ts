@@ -11,7 +11,14 @@ export async function getPublicHomepageData(prisma: PrismaClient) {
     include: {
       _count: {
         select: {
-          screenings: true,
+          screenings: {
+            where: {
+              status: ScreeningStatus.SCHEDULED,
+              startsAt: {
+                gte: now,
+              },
+            },
+          },
         },
       },
       screenings: {
