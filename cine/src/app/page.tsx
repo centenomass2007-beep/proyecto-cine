@@ -27,7 +27,7 @@ export default async function HomePage() {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/login"
+              href="/login/admin"
               className="inline-flex items-center justify-center rounded-full border border-[#E50914]/30 bg-[#E50914]/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#E50914]/15"
             >
               Iniciar sesión
